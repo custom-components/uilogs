@@ -1,0 +1,4 @@
+default_config:
+uilogs:
+logger:
+  default: info

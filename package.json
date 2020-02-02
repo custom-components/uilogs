@@ -1,0 +1,42 @@
+{
+  "name": "ui-logs",
+  "description": "UI Logs for Home Assistant",
+  "source": "src/main.ts",
+  "scripts": {
+    "postinstall": "patch-package",
+    "start": "rollup --config rollup.config.js --watch",
+    "build": "rollup --config rollup.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/custom_components/uilogs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/custom_components/uilogs/issues"
+  },
+  "homepage": "https://github.com/custom_components/uilogs#readme",
+  "devDependencies": {
+    "@ludeeus/colorlog": "^0.2.0",
+    "@rollup/plugin-json": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
+    "custom-card-helpers": "^1.4.0",
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "lit-element": "^2.0.1",
+    "prettier": "^1.16.4",
+    "rollup": "^1.24.0",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-cleanup": "^3.1.1",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-dev": "^1.1.1",
+    "rollup-plugin-gzip": "^2.2.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-progress": "^1.1.1",
+    "rollup-plugin-sizes": "^1.0.1",
+    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-typescript2": "^0.24.3",
+    "typescript": "^3.6.4"
+  }
+}
