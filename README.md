@@ -11,4 +11,6 @@ _Probably super useless, but whatever..._
 uilogs:
 ```
 
+When downloaded and configured, look for a new "Logs" entry in your sidebar.
+
 _no options, just add it._
