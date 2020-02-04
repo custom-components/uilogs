@@ -20,6 +20,8 @@
     "@rollup/plugin-json": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^2.4.0",
     "@typescript-eslint/parser": "^2.4.0",
+    "@material/mwc-list": "^0.13.0",
+    "@material/mwc-select": "^0.13.0",
     "custom-card-helpers": "^1.4.0",
     "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
