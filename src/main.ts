@@ -77,7 +77,7 @@ export class UiLogs extends LitElement {
             })}
             @click=${() => this._ChangeTabAction("ha")}
           >
-            Home Assistant
+            Core
           </div>
           ${this.hass.config.components.includes("hassio")
             ? html`
