@@ -19,6 +19,7 @@ export class UiLogs extends LitElement {
   @property() private _HALogs?: string;
   @property() private _SupervisorLogs?: string;
   @property() private _AddonLogs?: string;
+  @property() private _Filter?: string = "warning";
   @property() private _selected: "ha" | "supervisor" | "addon" = "ha";
   @property() private _addons?: Object[];
   @query("#log") private _logElement?: HTMLElement;
@@ -66,6 +67,20 @@ export class UiLogs extends LitElement {
     await this._ChangeTabAction("ha");
   }
 
+  _filterLogs(logs: string): string {
+    if (!this._Filter) return logs;
+    let filteredLogs: (string | undefined)[];
+
+    filteredLogs = logs.split("\n").map(line => {
+      if (line.toLowerCase().includes(String(this._Filter).toLowerCase())) {
+        return line;
+      }
+      return;
+    });
+
+    return filteredLogs.join("\n");
+  }
+
   protected render(): TemplateResult | void {
     return html`
       <div class="main">
@@ -108,14 +123,18 @@ export class UiLogs extends LitElement {
         ${this._selected === "ha"
           ? html`
               <div class="ha-log log" id="log">
-                <color-log .log=${this._HALogs || ""}></color-log>
+                <color-log
+                  .log=${this._filterLogs(this._HALogs || "")}
+                ></color-log>
               </div>
             `
           : this._selected === "supervisor"
           ? html`
               <div class="ha-log log" id="log">
                 <color-log
-                  .log=${this._SupervisorLogs?.replace(/\\[\d*\w/g, "") || ""}
+                  .log=${this._filterLogs(
+                    this._SupervisorLogs?.replace(/\\[\d*\w/g, "") || ""
+                  )}
                 ></color-log>
               </div>
             `
@@ -137,7 +156,9 @@ export class UiLogs extends LitElement {
                   })}
                 </mwc-select>
                 <color-log
-                  .log=${this._AddonLogs?.replace(/\\[\d*\w/g, "") || ""}
+                  .log=${this._filterLogs(
+                    this._AddonLogs?.replace(/\\[\d*\w/g, "") || ""
+                  )}
                 ></color-log>
               </div>
             `}
