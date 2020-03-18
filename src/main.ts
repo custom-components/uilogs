@@ -19,7 +19,7 @@ export class UiLogs extends LitElement {
   @property() private _HALogs?: string;
   @property() private _SupervisorLogs?: string;
   @property() private _AddonLogs?: string;
-  @property() private _Filter?: string = "warning";
+  @property() private _Filter?: string;
   @property() private _selected: "ha" | "supervisor" | "addon" = "ha";
   @property() private _addons?: Object[];
   @query("#log") private _logElement?: HTMLElement;
