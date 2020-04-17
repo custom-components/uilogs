@@ -5,7 +5,7 @@ import {
   html,
   css,
   query,
-  TemplateResult
+  TemplateResult,
 } from "lit-element";
 import { HomeAssistant } from "custom-card-helpers";
 import { classMap } from "lit-html/directives/class-map";
@@ -21,6 +21,7 @@ export class UiLogs extends LitElement {
   @property() private _AddonLogs?: string;
   @property() private _Filter?: string;
   @property() private _selected: "ha" | "supervisor" | "addon" = "ha";
+  @property() private _Addon?: string;
   @property() private _addons?: Object[];
   @query("#log") private _logElement?: HTMLElement;
 
@@ -41,16 +42,22 @@ export class UiLogs extends LitElement {
   }
 
   private async _setLogsAddon(slug: string): Promise<void> {
+    this._Addon = slug;
+    await this._getAdonLog();
+  }
+
+  private async _getAdonLog(): Promise<void> {
+    if (!this._Addon) return;
     this._AddonLogs = await this.hass.callApi(
       "GET",
-      `hassio/addons/${slug}/logs`
+      `hassio/addons/${this._Addon}/logs`
     );
   }
 
   private async _reload() {
     if (this._selected === "ha") await this._setLogsHA();
     else if (this._selected === "supervisor") await this._setLogsSupervisor();
-    else if (this._selected === "addon") await this._getAddons();
+    else if (this._selected === "addon") await this._getAdonLog();
     this._logElement?.scrollIntoView({ block: "end", behavior: "smooth" });
   }
 
@@ -71,7 +78,7 @@ export class UiLogs extends LitElement {
     if (!this._Filter) return logs;
     let filteredLogs: (string | undefined)[];
 
-    filteredLogs = logs.split("\n").map(line => {
+    filteredLogs = logs.split("\n").map((line) => {
       if (line.toLowerCase().includes(String(this._Filter).toLowerCase())) {
         return line;
       }
@@ -88,7 +95,7 @@ export class UiLogs extends LitElement {
           <div
             class=${classMap({
               "toolbar-button": true,
-              selected: this._selected === "ha"
+              selected: this._selected === "ha",
             })}
             @click=${() => this._ChangeTabAction("ha")}
           >
@@ -99,7 +106,7 @@ export class UiLogs extends LitElement {
                 <div
                   class=${classMap({
                     "toolbar-button": true,
-                    selected: this._selected === "supervisor"
+                    selected: this._selected === "supervisor",
                   })}
                   @click=${() => this._ChangeTabAction("supervisor")}
                 >
@@ -108,7 +115,7 @@ export class UiLogs extends LitElement {
                 <div
                   class=${classMap({
                     "toolbar-button": true,
-                    selected: this._selected === "addon"
+                    selected: this._selected === "addon",
                   })}
                   @click=${() => this._ChangeTabAction("addon")}
                 >
@@ -142,7 +149,7 @@ export class UiLogs extends LitElement {
               <div class="ha-log log" id="log">
                 <mwc-select outlined label="Addon">
                   <mwc-list-item selected value="" selected></mwc-list-item>
-                  ${this._addons?.map(addon => {
+                  ${this._addons?.map((addon) => {
                     if ((addon as any).installed) {
                       return html`
                         <mwc-list-item
