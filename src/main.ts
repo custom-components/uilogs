@@ -221,8 +221,10 @@ export class UiLogs extends LitElement {
       }
       .toolbar-button {
         z-index: 2;
-        font-size: x-large;
-        margin: 38px 32px 0 32px;
+        font-weight: 400;
+        font-size: var(--app-toolbar-font-size, 20px);
+        font-family: var(--paper-font-body1_-_font-family);
+        margin: 18px 32px;
         cursor: pointer;
       }
       .selected {
