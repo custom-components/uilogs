@@ -4,7 +4,7 @@
 async def async_setup(hass, config):
     """Set up this integration using yaml."""
     url = "/api/panel_custom/uilogs"
-    location = hass.config.path("custom_components/uilogs/uilogs.js.gz")
+    location = hass.config.path("custom_components/uilogs/uilogs.js")
     hass.http.register_static_path(url, location)
     hass.components.frontend.async_register_built_in_panel(
         component_name="custom",

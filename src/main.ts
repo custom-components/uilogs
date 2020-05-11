@@ -8,9 +8,8 @@ import {
   TemplateResult,
 } from "lit-element";
 import { HomeAssistant } from "custom-card-helpers";
-import { classMap } from "lit-html/directives/class-map";
-import "@material/mwc-select/mwc-select";
 import "@material/mwc-list/mwc-list-item";
+import "@material/mwc-select/mwc-select";
 import "@ludeeus/colorlog";
 
 @customElement("ui-logs")
@@ -19,11 +18,12 @@ export class UiLogs extends LitElement {
   @property() private _HALogs?: string;
   @property() private _SupervisorLogs?: string;
   @property() private _AddonLogs?: string;
-  @property() private _Filter?: string;
+  @property() private _Filter: string = "";
   @property() private _selected: "ha" | "supervisor" | "addon" = "ha";
   @property() private _Addon?: string;
   @property() private _addons?: Object[];
   @query("#log") private _logElement?: HTMLElement;
+  @query("#search-input") private _filterInput?: any;
 
   private async _getAddons(): Promise<void> {
     const response = await this.hass.callApi("GET", `hassio/addons`);
@@ -92,89 +92,175 @@ export class UiLogs extends LitElement {
     return html`
       <div class="main">
         <div class="toolbar">
-          <div
-            class=${classMap({
-              "toolbar-button": true,
-              selected: this._selected === "ha",
-            })}
-            @click=${() => this._ChangeTabAction("ha")}
-          >
-            Core
+          <div id="tabbar">
+            <div
+              class="${this._selected === "ha"
+                ? "toolbar-button selected"
+                : "toolbar-button"}"
+              @click=${() => this._ChangeTabAction("ha")}
+            >
+              Core
+            </div>
+            ${this.hass.config.components.includes("hassio")
+              ? html`
+                  <div
+                    class="toolbar-button ${this._selected === "supervisor"
+                      ? "toolbar-button selected"
+                      : "toolbar-button"}"
+                    @click=${() => this._ChangeTabAction("supervisor")}
+                  >
+                    Supervisor
+                  </div>
+                  <div
+                    class="toolbar-button ${this._selected === "addon"
+                      ? "toolbar-button selected"
+                      : "toolbar-button"}"
+                    @click=${() => this._ChangeTabAction("addon")}
+                  >
+                    Addons
+                  </div>
+                `
+              : ""}
           </div>
-          ${this.hass.config.components.includes("hassio")
+          <div id="toolbar-icon">
+            <ha-icon-button
+              icon="mdi:reload"
+              role="button"
+              @click=${this._reload}
+            ></ha-icon-button>
+          </div>
+        </div>
+        <div class="searchbar">
+          <ha-icon icon="mdi:magnify" role="button"></ha-icon>
+          <input
+            id="search-input"
+            class="search-input"
+            placeholder="Filter logs"
+            .value=${this._Filter}
+            @input=${this._filterInputChanged}
+          />
+          ${this._Filter
             ? html`
-                <div
-                  class=${classMap({
-                    "toolbar-button": true,
-                    selected: this._selected === "supervisor",
-                  })}
-                  @click=${() => this._ChangeTabAction("supervisor")}
-                >
-                  Supervisor
-                </div>
-                <div
-                  class=${classMap({
-                    "toolbar-button": true,
-                    selected: this._selected === "addon",
-                  })}
-                  @click=${() => this._ChangeTabAction("addon")}
-                >
-                  Addons
-                </div>
+                <ha-icon-button
+                  icon="mdi:close"
+                  role="button"
+                  @click=${this._clearFilter}
+                ></ha-icon-button>
               `
             : ""}
-          <span class="reload" title="reload" @click=${this._reload}
-            >&#x21bb;</span
-          >
         </div>
-        ${this._selected === "ha"
-          ? html`
-              <div class="ha-log log" id="log">
-                <color-log
-                  .log=${this._filterLogs(this._HALogs || "")}
-                ></color-log>
-              </div>
-            `
-          : this._selected === "supervisor"
-          ? html`
-              <div class="ha-log log" id="log">
-                <color-log
-                  .log=${this._filterLogs(
-                    this._SupervisorLogs?.replace(/\\[\d*\w/g, "") || ""
-                  )}
-                ></color-log>
-              </div>
-            `
-          : html`
-              <div class="ha-log log" id="log">
-                <mwc-select outlined label="Addon">
-                  <mwc-list-item selected value="" selected></mwc-list-item>
-                  ${this._addons?.map((addon) => {
-                    if ((addon as any).installed) {
-                      return html`
-                        <mwc-list-item
-                          @click=${() =>
-                            this._setLogsAddon((addon as any).slug)}
-                          >${(addon as any).name}</mwc-list-item
-                        >
-                      `;
-                    }
-                    return;
-                  })}
-                </mwc-select>
-                <color-log
-                  .log=${this._filterLogs(
-                    this._AddonLogs?.replace(/\\[\d*\w/g, "") || ""
-                  )}
-                ></color-log>
-              </div>
-            `}
+        <div class="content">
+          ${this._selected === "ha"
+            ? html`
+                <div class="ha-log log" id="log">
+                  <color-log
+                    .log=${this._filterLogs(this._HALogs || "")}
+                  ></color-log>
+                </div>
+              `
+            : this._selected === "supervisor"
+            ? html`
+                <div class="ha-log log" id="log">
+                  <color-log
+                    .log=${this._filterLogs(
+                      this._SupervisorLogs?.replace(/\\[\d*\w/g, "") || ""
+                    )}
+                  ></color-log>
+                </div>
+              `
+            : html`
+                <div class="ha-log log" id="log">
+                  <mwc-select outlined label="Addon">
+                    <mwc-list-item selected value="" selected></mwc-list-item>
+                    ${this._addons?.map((addon) => {
+                      if ((addon as any).installed) {
+                        return html`
+                          <mwc-list-item
+                            @click=${() =>
+                              this._setLogsAddon((addon as any).slug)}
+                            >${(addon as any).name}</mwc-list-item
+                          >
+                        `;
+                      }
+                      return;
+                    })}
+                  </mwc-select>
+                  <color-log
+                    .log=${this._filterLogs(
+                      this._AddonLogs?.replace(/\\[\d*\w/g, "") || ""
+                    )}
+                  ></color-log>
+                </div>
+              `}
+        </div>
       </div>
     `;
   }
 
+  private _clearFilter() {
+    this._Filter = "";
+  }
+
+  private _filterInputChanged() {
+    this._Filter = this._filterInput?.value;
+  }
+
   static get styles() {
     return css`
+      :host {
+        display: block;
+        height: 100%;
+        background-color: var(--primary-background-color);
+      }
+      ha-menu-button {
+        margin-right: 24px;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        font-size: 20px;
+        height: 65px;
+        background-color: var(--sidebar-background-color);
+        font-weight: 400;
+        color: var(--sidebar-text-color);
+        border-bottom: 1px solid var(--divider-color);
+        font-family: var(--paper-font-body1_-_font-family);
+        padding: 0 16px;
+        box-sizing: border-box;
+      }
+      .searchbar {
+        display: flex;
+        align-items: center;
+        font-size: 20px;
+        top: 65px;
+        height: 65px;
+        background-color: var(--sidebar-background-color);
+        border-bottom: 1px solid var(--divider-color);
+        padding: 0 16px;
+        box-sizing: border-box;
+      }
+      #tabbar {
+        display: flex;
+        font-size: 14px;
+        flex: 1;
+        justify-content: center;
+      }
+
+      :host(:not([narrow])) #toolbar-icon {
+        min-width: 40px;
+      }
+
+      .content {
+        position: absolute;
+        width: 100%;
+        height: calc(100% - 65px - 65px);
+        overflow-y: auto;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      :host([narrow]) .content {
+        height: calc(100% - 128px);
+      }
       mwc-select {
         width: calc(100% - 16px);
         margin: 8px;
@@ -183,7 +269,6 @@ export class UiLogs extends LitElement {
       }
       .log {
         margin: 8px;
-        margin-top: 73px;
         padding: 4px;
         position: relative;
         background: var(
@@ -204,40 +289,49 @@ export class UiLogs extends LitElement {
       color-log {
         --colorlog-text: var(--primary-text-color);
       }
-      .main {
-        background-color: var(--primary-background-color);
-        color: var(--primary-text-color);
-        padding: 1px;
-      }
-      .toolbar {
-        display: flex;
-        position: fixed;
-        z-index: 1;
-        width: 100%;
-        top: 0;
-        height: 65px;
-        background-color: var(--app-header-background-color);
-        color: var(--text-primary-color);
-      }
-      .toolbar-button {
-        z-index: 2;
-        font-weight: 400;
-        font-size: var(--app-toolbar-font-size, 20px);
-        font-family: var(--paper-font-body1_-_font-family);
-        margin: 18px 32px;
-        cursor: pointer;
-      }
-      .selected {
-        text-decoration: underline;
-      }
+
       .reload {
         z-index: 2;
-        font-family: Lucida Sans Unicode;
-        font-size: xx-large;
         position: fixed;
         right: 8px;
         top: 8px;
+      }
+
+      .toolbar-button {
+        padding: 0 32px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        height: 64px;
         cursor: pointer;
+        position: relative;
+        outline: none;
+        box-sizing: border-box;
+      }
+      .name {
+        white-space: nowrap;
+      }
+      ha-icon-button {
+        cursor: pointer;
+      }
+      .selected {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+      }
+      .search-input {
+        width: calc(100% - 48px);
+        height: 40px;
+        border: 0;
+        padding: 0 16px;
+        font-size: initial;
+        color: var(--sidebar-text-color);
+        font-family: var(--paper-font-body1_-_font-family);
+      }
+      input:focus {
+        outline-offset: 0;
+        outline: 0;
       }
     `;
   }

@@ -13,7 +13,7 @@ const isdev = process.env.ROLLUP_WATCH;
 
 const opts_json = {
   compact: true,
-  preferConst: true
+  preferConst: true,
 };
 
 const opts_terser = {};
@@ -21,15 +21,15 @@ const opts_terser = {};
 const opts_dev = {
   dirs: ["custom_components/uilogs/"],
   port: 5000,
-  host: "0.0.0.0"
+  host: "0.0.0.0",
 };
 
 const opts_cleanup = {
-  comments: "none"
+  comments: "none",
 };
 
 const opts_sizes = {
-  details: true
+  details: true,
 };
 
 const AwesomePlugins = [
@@ -43,16 +43,22 @@ const AwesomePlugins = [
   isdev && sizes(),
   isdev && sizes(opts_sizes),
   isdev && dev(opts_dev),
-  !isdev && gzipPlugin()
+  !isdev && gzipPlugin(),
 ];
 
 export default [
   {
+    watch: {
+      chokidar: {
+        usePolling: true,
+      },
+    },
     input: ["src/main.ts"],
     output: {
       file: `custom_components/uilogs/uilogs.js`,
-      format: "iife"
+      name: "uilogs.js",
+      format: "iife",
     },
-    plugins: [...AwesomePlugins]
-  }
+    plugins: [...AwesomePlugins],
+  },
 ];
