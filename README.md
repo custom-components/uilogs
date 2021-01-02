@@ -1,4 +1,4 @@
-# UI Logs
+# !DEPRECATED!: UI Logs
 
 Custom panel that show colorful logs for Home Assistant (core), and the supervisor (if you have it).
 
